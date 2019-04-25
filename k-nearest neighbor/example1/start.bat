@@ -1,0 +1,2 @@
+python KNN.py
+pause
