@@ -14,7 +14,22 @@ cost'b = ∑[(h(x)-y)*1] * 1/m
 
 当我求出代价函数后，就可以之作为特征参数的修正
 
+
 多元线程回归参照同上
+
+
+标准方乘法：
+∑[(h(x)-y)**2] 按照矩阵的方式进行修正得到 (WX-y)T * (WX-y)
+代价函数：cost = (WX-y)T * (WX-y)
+对代价函数求导：
+cost = Xt.Wt.WX - Xt.Wt.y - yt.WX - yt.y
+cost'w = (Xt.WX + Xt.WX) - Xt.y - Xt.y - 0
+       = 2Xt.WX - 2Xt.y = 0
+       => Xt.WX = Xt.y
+       => (Xt.X).I.Xt.WX = (Xt.X).I.Xt.y
+       => W = (Xt.X).I.Xt.y
+这就是标方程法得到的最终结果，可以直接泏结果出来
+就是特征参数 = (X矩阵转置*X矩阵)的逆矩阵 * X矩阵转置 * y矩阵
 """
 
 # y = kx + b
@@ -95,14 +110,14 @@ if __name__ == '__main__':
     # print(mulComputeError(dataSetX1, dataSetX2, dataSetY, k1, k2, b))
 
     # 标准方程法
-    # x_data = np.array([dataSetX]).T
-    # X_data = np.concatenate((np.ones((100, 1)), x_data), axis=1)
-    # Y_data = np.array([dataSetY]).T
-    # ws = weight(X_data, Y_data)
-    # print(ws, ws[0], ws[1])
-    # plt.plot(dataSetX, dataSetY, 'b.')
-    # plt.plot(np.array([[0], [100]]),  np.array([[0], [100]])*ws[1] + ws[0], 'r')
-    # plt.show()
+    x_data = np.array([dataSetX]).T
+    X_data = np.concatenate((np.ones((100, 1)), x_data), axis=1)
+    Y_data = np.array([dataSetY]).T
+    ws = weight(X_data, Y_data)
+    print(ws, ws[0], ws[1])
+    plt.plot(dataSetX, dataSetY, 'b.')
+    plt.plot(np.array([[0], [100]]),  np.array([[0], [100]])*ws[1] + ws[0], 'r')
+    plt.show()
 
 
 """
