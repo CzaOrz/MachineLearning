@@ -26,7 +26,7 @@ __file__ = "Machine Learning"
 说明：梯度下降算法
 原理：Cost'相当于斜率，修正W用此方法，往斜率方向步进，得到修正值
     Cost = -{∑[-y*log(h(x)) + (1-y)*log(1-h(x))]} / m
-    Cost' = ∑[x(h(x)-y)] / m  
+    Cost' = ∑[x(h(x)-y)] / m
 
 5、SVM/MVO
 
@@ -35,6 +35,8 @@ __file__ = "Machine Learning"
 h(x) = f(∑[WX])
 W := W + learningRate*(y-h(x))*X
 
+线性神经网络
+BP神经网络
 """  # todo 目前新闻分类可以采用 KNN和NaiveBayes，但是NaiveBayes对数据训练有一定算法要求
 
 
