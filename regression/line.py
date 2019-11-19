@@ -4,7 +4,7 @@ import random
 from sklearn.linear_model import LinearRegression
 
 
-"""
+"""处理回归问题
 一元线性回归
 线性方程： h(x) = kx + b
 代价函数： cost = ∑[(h(x)-y)**2] * 1/2m
