@@ -8,6 +8,7 @@ from sklearn import preprocessing
 h(x) = WX
 Cost = -{∑[-y*log(h(x)) + (1-y)*log(1-h(x))]} / m
 Cost' = ∑[x(h(x)-y)] / m
+w := w - learningRate*Cost'
 
 if f = sigmoid(x):
     f' = sigmoid(x) * (1-sigmoid(x))

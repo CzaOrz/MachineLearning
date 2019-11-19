@@ -11,6 +11,8 @@ from sklearn.linear_model import LinearRegression
 对代价函数求导：
 cost'k = ∑[(h(x)-y)*x] * 1/m
 cost'b = ∑[(h(x)-y)*1] * 1/m
+k = k - learningRate*cost'k
+b = b - learningRate*cost'b
 
 当我求出代价函数后，就可以之作为特征参数的修正
 
