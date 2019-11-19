@@ -23,6 +23,7 @@ __file__ = "Machine Learning"
 
 4、LogisticRegression/GradientDescent
 类别：二分类
+说明：梯度下降算法
 
 5、SVM/MVO
 

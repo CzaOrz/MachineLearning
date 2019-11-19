@@ -3,6 +3,14 @@ import random
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 
+
+"""
+h(x) = WX
+Cost = -{∑[-y*log(h(x)) + (1-y)*log(1-h(x))]} / m
+Cost' = 
+"""
+
+
 lr = 0.001
 def sigmoid(x):
     return 1.0 / (1 + np.exp(-x))
@@ -25,8 +33,8 @@ def gra(dataX, dataY):
     return ws
 
 if __name__ == '__main__':
-    x1 = [[random.randint(i, i+10), random.randint(10, 40)] for i in range(100)]
-    x2 = [[random.randint(i, i+10), random.randint(60, 90)] for i in range(100, 200)]
+    x1 = [[i, random.randint(10, 40)] for i in range(100)]
+    x2 = [[i, random.randint(60, 90)] for i in range(100, 200)]
     dataY = [1 for i in range(100)] + [0 for i in range(100)]
     dataX = x1 + x2
     dataX = np.array(dataX)
