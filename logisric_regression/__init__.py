@@ -7,7 +7,12 @@ from sklearn import preprocessing
 """
 h(x) = WX
 Cost = -{∑[-y*log(h(x)) + (1-y)*log(1-h(x))]} / m
-Cost' = 
+Cost' = ∑[x(h(x)-y)] / m
+
+if f = sigmoid(x):
+    f' = sigmoid(x) * (1-sigmoid(x))
+
+
 """
 
 
@@ -26,14 +31,18 @@ def gra(dataX, dataY):
     dataY = np.mat(dataY)
     m, n = dataX.shape
     ws = np.mat(np.ones((n, 1)))
+    cosy_list = []
     for i in range(500):
         h = sigmoid(dataX * ws)
         ws_grad = dataX.T * (h - dataY) / m
         ws = ws - lr * ws_grad
+        if i != 0 and i % 50 == 0:
+            cosy_list.append(cost(dataX, dataY, ws))
+    print(cosy_list)
     return ws
 
 if __name__ == '__main__':
-    x1 = [[i, random.randint(10, 40)] for i in range(100)]
+    x1 = [[i, random.randint(10, 40)] for i in range(0,100)]
     x2 = [[i, random.randint(60, 90)] for i in range(100, 200)]
     dataY = [1 for i in range(100)] + [0 for i in range(100)]
     dataX = x1 + x2
@@ -49,15 +58,15 @@ if __name__ == '__main__':
     ws = gra(dataX, dataY)
     print(ws)
 
-    xx1 = [i[0] for i in x1]
-    yy1 = [i[1] for i in x1]
-    xx2 = [i[0] for i in x2]
-    yy2 = [i[1] for i in x2]
-    plt.scatter(xx1, yy1, c='r')
-    plt.scatter(xx2, yy2, c='b')
-    x_test = [[-4], [200]]
-    y_test = (-ws[0] - x_test * ws[1]) / ws[2]
-    plt.plot(x_test, y_test, 'k')
-    plt.show()
+    # xx1 = [i[0] for i in x1]
+    # yy1 = [i[1] for i in x1]
+    # xx2 = [i[0] for i in x2]
+    # yy2 = [i[1] for i in x2]
+    # plt.scatter(xx1, yy1, c='r')
+    # plt.scatter(xx2, yy2, c='b')
+    # x_test = [[-4], [200]]
+    # y_test = (-ws[0] - x_test * ws[1]) / ws[2]
+    # plt.plot(x_test, y_test, 'k')
+    # plt.show()
 
 
