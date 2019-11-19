@@ -1,7 +1,26 @@
 import random
 import numpy as np
 
+"""
+主要就是求两直线x1,x2之间最近距离d
+wx1 + b = 1
+wx2 + b = -1
+=> w(x1 - x2) = 2
+=> |w| * |x1->x2| * cos' = 2
+=> |w| * d = 2
+=> d = 2/|w|
 
+wx + b >= 1   label1 
+wx + b <= -1  label2
+=> y(wx + b) >= 1
+=> max(2/|w|)
+=> min(|w|**2/2)
+=> Cost = |w|**2/2  求极值，转化为凸优化问题
+可以分为三种：
+无约束问题： - 费马定理
+带等式约束问题： - 拉格朗日乘子法 -> 目标函数 + (拉格朗日乘子 * 约束条件)转化
+带不等式约束问题： - KKT条件
+"""
 def selectJrand(i, m):
     j = i
     while (j == i):
