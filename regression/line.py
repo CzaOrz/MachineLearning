@@ -3,6 +3,20 @@ import numpy as np
 import random
 from sklearn.linear_model import LinearRegression
 
+
+"""
+一元线性回归
+线性方程： h(x) = kx + b
+代价函数： cost = ∑[(h(x)-y)**2] * 1/2m
+对代价函数求导：
+cost'k = ∑[(h(x)-y)*x] * 1/m
+cost'b = ∑[(h(x)-y)*1] * 1/m
+
+当我求出代价函数后，就可以之作为特征参数的修正
+
+多元线程回归参照同上
+"""
+
 # y = kx + b
 learningRate = 0.0001
 k = b = 0
@@ -65,12 +79,12 @@ def weight(xArr, yArr):
 if __name__ == '__main__':
     dataSetX = [random.randint(i, i + 10) for i in range(100)]
     dataSetY = [random.randint(i, i + 10) for i in range(100)]
-    # k, b = compute(dataSetX, dataSetY, k, b, learningRate, maxIter)
-    # plt.scatter(dataSetX, dataSetY)
-    # plt.plot(dataSetX, dataSetY, 'b.')
-    # plt.plot(np.array(dataSetX), k * np.array(dataSetX) + b, 'r')
-    # plt.show()
-    # print(k, b)
+    k, b = compute(dataSetX, dataSetY, k, b, learningRate, maxIter)
+    plt.scatter(dataSetX, dataSetY)
+    plt.plot(dataSetX, dataSetY, 'b.')
+    plt.plot(np.array(dataSetX), k * np.array(dataSetX) + b, 'r')
+    plt.show()
+    print(k, b)
 
     # k1 = k2 = b = 0
     # dataSetX1 = [100, 50, 100, 100, 50, 80, 75, 65, 90, 90]
@@ -81,14 +95,14 @@ if __name__ == '__main__':
     # print(mulComputeError(dataSetX1, dataSetX2, dataSetY, k1, k2, b))
 
     # 标准方程法
-    x_data = np.array([dataSetX]).T
-    X_data = np.concatenate((np.ones((100, 1)), x_data), axis=1)
-    Y_data = np.array([dataSetY]).T
-    ws = weight(X_data, Y_data)
-    print(ws, ws[0], ws[1])
-    plt.plot(dataSetX, dataSetY, 'b.')
-    plt.plot(np.array([[0], [100]]),  np.array([[0], [100]])*ws[1] + ws[0], 'r')
-    plt.show()
+    # x_data = np.array([dataSetX]).T
+    # X_data = np.concatenate((np.ones((100, 1)), x_data), axis=1)
+    # Y_data = np.array([dataSetY]).T
+    # ws = weight(X_data, Y_data)
+    # print(ws, ws[0], ws[1])
+    # plt.plot(dataSetX, dataSetY, 'b.')
+    # plt.plot(np.array([[0], [100]]),  np.array([[0], [100]])*ws[1] + ws[0], 'r')
+    # plt.show()
 
 
 """
