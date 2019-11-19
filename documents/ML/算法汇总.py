@@ -31,6 +31,9 @@ __file__ = "Machine Learning"
 5、SVM/MVO
 
 6、NeuralNetwork/感知器/神经网络/深度学习
+感知器
+h(x) = f(∑[WX])
+W := W + learningRate*(y-h(x))*X
 
 """  # todo 目前新闻分类可以采用 KNN和NaiveBayes，但是NaiveBayes对数据训练有一定算法要求
 
