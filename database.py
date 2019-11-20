@@ -6,8 +6,12 @@ import json
 import jieba
 from minitools.ml.naivebayes import NaiveBayes
 import numpy as np
+
+
 def cutTitle(title):
     return [i for i in list(jieba.cut(title)) if len(i.strip()) > 1]
+
+
 def test1():
     text = """
     军事：
@@ -55,6 +59,8 @@ def test1():
             continue
         print(ccc)
         count += 1
+
+
 def test2():
     cza = get_mongodb_client()['news']['train']
     sett = set()
@@ -75,14 +81,18 @@ def test2():
         # cza.update_one({'_id': new['_id']}, {'$set': {'label': label}})
         count += 1
         sett.add(label)
+
+
 def test3():
     cza = get_mongodb_client()['news']['train']
     sdict = {}
-    for new in cza.find({}, {'_id': 0,'label': 1, '标题': 1}):
+    for new in cza.find({}, {'_id': 0, 'label': 1, '标题': 1}):
         sdict[new['label']] = sdict.get(new['label'], 0) + 1
     pprint(sdict)
     # with open('keyCounter.json', 'w') as f:
     #     f.write(json.dumps(sdict, ensure_ascii=False))
+
+
 def test4():
     with open('keyCounter.json', 'r') as f:
         json_data = json.loads(f.read())
@@ -97,12 +107,16 @@ def test4():
     # print(len(new_data))
     with open('newKeyCounter.json', 'w') as f:
         f.write(json.dumps(new_data, ensure_ascii=False))
+
+
 def test5():
     with open('newKeyCounter.json', 'r') as f:
         json_data = json.loads(f.read())
     pprint(json_data)
     values = json_data.values()
     print(sum(values))
+
+
 def test6():
     cza = get_mongodb_client()['news']['train']
     titles = set()
@@ -112,6 +126,8 @@ def test6():
     # print(len(titles))  # 501878
     with open('allUniqueLabel.json', 'w') as f:
         f.write(json.dumps(list(titles), ensure_ascii=False))
+
+
 def test7():
     with open('allUniqueLabel.json', 'r') as f:
         json_data = json.loads(f.read())
@@ -122,42 +138,46 @@ def test7():
     # with open('allUniqueLabel.json', 'w') as f:
     #     f.write(json.dumps(json_data, ensure_ascii=False))
 
+
 def test8():
     with open('newKeyCounter.json', 'r') as f:
         keyCounter = list(json.loads(f.read()).keys())
     with open('allUniqueLabel.json', 'r') as f:
         json_data = json.loads(f.read())
-    vector = np.array([1 for _ in range(len(json_data))])
-    count = len(json_data)
-    vector = vector / count
+    # vector = np.array([1 for _ in range(len(json_data))])
+    # count = len(json_data)
+    # vector = vector / count
+    # print(len(keyCounter))  # 832
     cza = get_mongodb_client()['news']['train']
     aaaa = 0
-    for key in keyCounter:
-        if aaaa == 2:
-            break
-        if cza.count({'label': key}) > 100:
-            continue
-        aaaa += 1
-        # vectorSelf = np.array([0 for _ in range(len(json_data))])
-        index_dict = {}
-        for new in cza.find({'label': key}, {'_id': 0, 'label': 1, '标题': 1}):
-            # arr = np.array(NaiveBayes.set2vector(cutTitle(new['标题']), json_data))
-            # vector = [0 for _ in range(len(json_data))]
-            for word in cutTitle(new['标题']):
-                if word in json_data:
-                    index_dict[json_data.index(word)] = index_dict.get(json_data.index(word), 0) + 1
-        print(index_dict)
+    with open('train.txt', 'w+') as f:
+        for key in keyCounter:
+            # if aaaa == 4:
+            #     break
+            # if cza.count({'label': key}) > 100:
+            #     continue
+            # aaaa += 1
+            index_dict = {}
+            for new in cza.find({'label': key}, {'_id': 0, 'label': 1, '标题': 1}):
+                # todo 可以只保存下标，获取得到字典，然后训练字典与目标字典进行合并，已朴素贝叶斯求解
+                for word in cutTitle(new['标题']):
+                    if word in json_data:
+                        index_dict[json_data.index(word)] = index_dict.get(json_data.index(word), 0) + 1
+            sumValue = sum(index_dict.values())
+            index_dict = {key: value / sumValue for key, value in index_dict.items()}
+            f.write(json.dumps(index_dict, ensure_ascii=False) + '|' + key + '\n')
+            del index_dict
+            print(key, 'done')
 
 
-
-        #     arr = 0
-        #     vectorSelf += arr
-        #     count += np.sum(arr)
-        # res = list(np.log(vectorSelf/count + vector))
-        # with open('train.txt', 'a+') as f:
-        #     f.write(json.dumps(res, ensure_ascii=False)+','+key)
-        # aaaa += 1
-        # print(aaaa, key)
+def test9():
+    with open('train.txt', 'r') as f:
+        while True:
+            content = f.readline()
+            if not content:
+                break
+            json_data, label = content.strip().split('|')
+            print(label, len(json.loads(json_data)))
 
 
 if __name__ == '__main__':
@@ -169,7 +189,7 @@ if __name__ == '__main__':
     # test6.()
     # test7()
     test8()
-
+    # test9()
 
     # a = np.array([1,2,3,4,5])
     # b = np.array([1, 2, 3, 4, 5])
