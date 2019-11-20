@@ -31,11 +31,27 @@ __file__ = "Machine Learning"
 5、SVM/MVO
 
 6、NeuralNetwork/感知器/神经网络/深度学习
-感知器
+一元线性回归问题：
+线性角度来看：h(x) = kx + b
+Cost = ∑[h(x)-y]**2/2m
+Cost'k = ∑[h(x)-y]*x/m
+Cost'b = ∑[h(x)-y]/m
+针对各个参数，可以进行求和优化 
+
+标准方程法解线性回归：
+需要一个转化为矩阵的过程
+∑[h(x)-y]**2 => [h(x)-y].T * [h(x)-y] => 有种求內积的感觉 => h(x)=WX
+Cost'w = 2X.T * WX - 2X.T * y = 0
+=> W = (Xt.X).I.Xt.y
+
+感知器：
 h(x) = f(∑[WX])
-W := W + learningRate*(y-h(x))*X
+W := W + learningRate*(y-h(x))*X  => 这玩意可以直接出公式了嘛，快
 
 线性神经网络
+
+
+
 BP神经网络
 """  # todo 目前新闻分类可以采用 KNN和NaiveBayes，但是NaiveBayes对数据训练有一定算法要求
 
