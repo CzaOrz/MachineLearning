@@ -187,10 +187,11 @@ def test9(title="", fromSource=False):
     wordLabel = None
     wordValue = 0
     with open('train.txt', 'r') as f:
-        while True:
-            content = f.readline()
-            if not content:
-                break
+        for content in f:
+        # while True:
+        #     content = f.readline()
+        #     if not content:
+        #         break
             json_data, label = content.strip().split('|')
             trainSet = json.loads(json_data)  # 得到训练数据
             wordValueTemp = 0
@@ -288,23 +289,23 @@ if __name__ == '__main__':
     # test5()
     # test6()
     # test7()
-    test8()
+    # test8()
 
-    # for title in [
-    #     # '临夏河州大道—北滨河大道中压天然气管道 工程竣工并正式通气',
-    #     # '关于陈光荣等同志任职的通知',
-    #     # '民政部社会救助司调研指导临夏州脱贫攻坚',
-    #     # '姚逊在武乡县调研时强调抓好基层党建 助推脱贫攻坚',
-    #     # '州人民政府第32次常务会议',
-    #     # '州人民政府第30次常务会议',
-    #     # '长治市脱贫攻坚简报总第46期',
-    #     #
-    #     # '大九湖镇：狠抓一线落实 强化责任担当 全力以赴做好迎检工作',
-    #     # '宋洛乡：党风廉政建设 “三治融合”显实效',
-    #     # '中共神农架林区委员会组织部干部任前公示公告（2019年第009号)',
-    #     '组织部干部任前公示公告',
-    # ]:
-    #     test9(title, fromSource=True)
+    for title in [
+        # '临夏河州大道—北滨河大道中压天然气管道 工程竣工并正式通气',
+        # '关于陈光荣等同志任职的通知',
+        # '民政部社会救助司调研指导临夏州脱贫攻坚',
+        # '姚逊在武乡县调研时强调抓好基层党建 助推脱贫攻坚',
+        # '州人民政府第32次常务会议',
+        # '州人民政府第30次常务会议',
+        # '长治市脱贫攻坚简报总第46期',
+        #
+        # '大九湖镇：狠抓一线落实 强化责任担当 全力以赴做好迎检工作',
+        # '宋洛乡：党风廉政建设 “三治融合”显实效',
+        # '中共神农架林区委员会组织部干部任前公示公告（2019年第009号)',
+        '组织部干部任前公示公告',
+    ]:
+        test9(title, fromSource=True)
 
     # test10(100)
     # test11()

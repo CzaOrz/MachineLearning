@@ -18,10 +18,7 @@ def classifyV1(title=""):
     wordLabel = None
     wordValue = 0
     with open('train.txt', 'r') as f:
-        while True:
-            content = f.readline()
-            if not content:
-                break
+        for content in f:
             json_data, label = content.strip().split('|')
             trainSet = json.loads(json_data)  # 得到训练数据
             wordValueTemp = 0
