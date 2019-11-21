@@ -149,35 +149,58 @@ def test8():
     # vector = vector / count
     # print(len(keyCounter))  # 832
     cza = get_mongodb_client()['news']['train']
-    aaaa = 0
-    with open('train.txt', 'w+') as f:
-        for key in keyCounter:
-            # if aaaa == 4:
-            #     break
-            # if cza.count({'label': key}) > 100:
-            #     continue
-            # aaaa += 1
-            index_dict = {}
-            for new in cza.find({'label': key}, {'_id': 0, 'label': 1, '标题': 1}):
-                # todo 可以只保存下标，获取得到字典，然后训练字典与目标字典进行合并，已朴素贝叶斯求解
-                for word in cutTitle(new['标题']):
-                    if word in json_data:
-                        index_dict[json_data.index(word)] = index_dict.get(json_data.index(word), 0) + 1
-            sumValue = sum(index_dict.values())
-            index_dict = {key: value / sumValue for key, value in index_dict.items()}
-            f.write(json.dumps(index_dict, ensure_ascii=False) + '|' + key + '\n')
-            del index_dict
-            print(key, 'done')
+    count = []
+    ttt = 0
+    for key in keyCounter:
+        ttt += 1
+        count.append(cza.count({'label': key}))
+    print(ttt)
+    print(sum(count))
+
+    # ---------------- 训练数据的具体代码 ------------------------------
+    # with open('train.txt', 'w+') as f:
+    #     for key in keyCounter:
+    #         index_dict = {}
+    #         for new in cza.find({'label': key}, {'_id': 0, 'label': 1, '标题': 1}):
+    #             # todo 可以只保存下标，获取得到字典，然后训练字典与目标字典进行合并，已朴素贝叶斯求解
+    #             for word in cutTitle(new['标题']):
+    #                 if word in json_data:
+    #                     index_dict[json_data.index(word)] = index_dict.get(json_data.index(word), 0) + 1
+    #         sumValue = sum(index_dict.values())
+    #         index_dict = {key: value / sumValue for key, value in index_dict.items()}
+    #         f.write(json.dumps(index_dict, ensure_ascii=False) + '|' + key + '\n')
+    #         del index_dict
+    #         print(key, 'done')
 
 
-def test9():
+def test9(title="", fromSource=False):
+    wordTitle = title
+    with open('allUniqueLabel.json', 'r') as f:
+        json_data = json.loads(f.read())
+    index_dict = {}
+    for word in cutTitle(wordTitle):
+        if word in json_data:
+            index_dict[json_data.index(word)] = index_dict.get(json_data.index(word), 0) + 1
+    wordLabel = None
+    wordValue = 0
     with open('train.txt', 'r') as f:
         while True:
             content = f.readline()
             if not content:
                 break
             json_data, label = content.strip().split('|')
-            print(label, len(json.loads(json_data)))
+            trainSet = json.loads(json_data)  # 得到训练数据
+            wordValueTemp = 0
+            for key, value in index_dict.items():
+                trainKey = trainSet.get(key, None)
+                if trainKey:
+                    wordValueTemp += value * trainKey
+            if wordValueTemp > wordValue:
+                wordValue = wordValueTemp
+                wordLabel = label
+        print(f"原标题：{wordTitle}")
+        print(f"原label：{get_mongodb_client()['news']['train'].find_one({'标题': wordTitle})}") if fromSource else None
+        print(f"预测分类为：{wordLabel}\n")
 
 
 if __name__ == '__main__':
@@ -186,10 +209,17 @@ if __name__ == '__main__':
     # test3()
     # test4()
     # test5()
-    # test6.()
+    # test6()
     # test7()
-    test8()
-    # test9()
+    # test8()
+
+    for title in [
+        '临夏河州大道—北滨河大道中压天然气管道 工程竣工并正式通气',
+        '关于陈光荣等同志任职的通知',
+        '民政部社会救助司调研指导临夏州脱贫攻坚',
+        '姚逊在武乡县调研时强调抓好基层党建 助推脱贫攻坚'
+    ]:
+        test9(title, fromSource=True)
 
     # a = np.array([1,2,3,4,5])
     # b = np.array([1, 2, 3, 4, 5])
