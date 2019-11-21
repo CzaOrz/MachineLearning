@@ -30,3 +30,8 @@ def classifyV1(title=""):
                 wordValue = wordValueTemp
                 wordLabel = label
     return wordLabel
+
+
+def classifyV2():  # todo 加入动态 权重参数。放大那些mini数据
+    pass
+
