@@ -159,18 +159,59 @@ def test8():
     # print(sum(count))
 
     # ---------------- 训练数据的具体代码 ------------------------------
+    # with open('train.txt', 'w+') as f:
+    #     for key in keyCounter:
+    #         index_dict = {}
+    #         for new in cza.find({'label': key}, {'_id': 0, 'label': 1, '标题': 1}):
+    #             # todo 可以只保存下标，获取得到字典，然后训练字典与目标字典进行合并，已朴素贝叶斯求解
+    #             for word in cutTitle(new['标题']):
+    #                 if word in json_data:
+    #                     index = json_data.index(word)
+    #                     index_dict[index] = index_dict.get(index, 0) + 1
+    #         sumValue = sum(index_dict.values())
+    #         index_dict = {key: value / sumValue for key, value in index_dict.items()}
+    #         f.write(json.dumps(index_dict, ensure_ascii=False) + '|' + key + '\n')
+    #         del index_dict
+    #         print(key, 'done')
     with open('train.txt', 'w+') as f:
         for key in keyCounter:
+            jump = False
+            for fil in ['伊春', '文昌', '长治', '咸阳', '嘉兴', '贵州', '外埠', '阳泉','盐城','昌平',
+'孙大军', '安顺', '宝坻', '山西', '巴中', '怀柔', '襄阳'
+'陵水','南宁','安阳','乌海', '黎苗',]:
+                if fil in key:
+                    jump = True
+                    break
+            if jump:
+                continue
             index_dict = {}
+            jss = 0
             for new in cza.find({'label': key}, {'_id': 0, 'label': 1, '标题': 1}):
-                # todo 可以只保存下标，获取得到字典，然后训练字典与目标字典进行合并，已朴素贝叶斯求解
+                if jss == 3001:
+                    break
+                jss += 1
                 for word in cutTitle(new['标题']):
                     if word in json_data:
-                        index_dict[json_data.index(word)] = index_dict.get(json_data.index(word), 0) + 1
-            sumValue = sum(index_dict.values())
-            index_dict = {key: value / sumValue for key, value in index_dict.items()}
-            f.write(json.dumps(index_dict, ensure_ascii=False) + '|' + key + '\n')
-            del index_dict
+                        index = json_data.index(word)
+                        index_dict[index] = index_dict.get(index, 0) + 1
+            dict_values = index_dict.values()
+            dict_values_max = max(dict_values)
+            dict_values_min = min(dict_values)
+            denominator = dict_values_max - dict_values_min
+            new_index_dict = {}
+            for index_dict_key, index_dict_value in index_dict.items():
+                v = (index_dict_value - dict_values_min) / denominator
+                if v < 0.8:
+                    v = min(max(v, 0.03), 0.06)
+                elif v < 0.5:
+                    pass
+                elif v < 0.7:
+                    v = v / 1.3
+                else:
+                    v = v / 5
+                new_index_dict[index_dict_key] = float(v)
+            f.write(json.dumps(new_index_dict) + '|' + key + '\n')
+            del index_dict, new_index_dict
             print(key, 'done')
 
 
@@ -188,10 +229,6 @@ def test9(title="", fromSource=False):
     wordValue = 0
     with open('train.txt', 'r') as f:
         for content in f:
-        # while True:
-        #     content = f.readline()
-        #     if not content:
-        #         break
             json_data, label = content.strip().split('|')
             trainSet = json.loads(json_data)  # 得到训练数据
             wordValueTemp = 0
@@ -199,10 +236,10 @@ def test9(title="", fromSource=False):
                 trainKey = trainSet.get(str(key), None)
                 if trainKey:
                     wordValueTemp += value * trainKey
-            if label == '每日水质' or label == '人事任免':
-                print(label, wordValueTemp, '##################')
-            else:
-                print(label, wordValueTemp)
+            # if label == '每日水质' or label == '人事任免':
+            #     print(label, wordValueTemp, '##################')
+            # else:
+            #     print(label, wordValueTemp)
             if wordValueTemp > wordValue:
                 wordValue = wordValueTemp
                 wordLabel = label
@@ -225,7 +262,8 @@ def test10(limit=-1):
         index_dict = {}
         for word in cutTitle(wordTitle):
             if word in json_data:
-                index_dict[json_data.index(word)] = index_dict.get(json_data.index(word), 0) + 1
+                index = json_data.index(word)
+                index_dict[index] = index_dict.get(index, 0) + 1
         wordLabel = None
         wordValue = 0
         with open('train.txt', 'r') as f:
@@ -262,14 +300,12 @@ def test11():
         index_dict = {}
         for word in cutTitle(wordTitle):
             if word in json_data:
-                index_dict[json_data.index(word)] = index_dict.get(json_data.index(word), 0) + 1
+                index = json_data.index(word)
+                index_dict[index] = index_dict.get(index, 0) + 1
         wordLabel = None
         wordValue = 0
         with open('train.txt', 'r') as f:
-            while True:
-                content = f.readline()
-                if not content:
-                    break
+            for content in f:
                 train_json_data, label = content.strip().split('|')
                 trainSet = json.loads(train_json_data)  # 得到训练数据
                 wordValueTemp = 0
@@ -279,8 +315,8 @@ def test11():
                         wordValueTemp += value * trainKey
                 if wordValueTemp > wordValue:
                     wordValue = wordValueTemp
-                    wordLabel = label
-        client.update_one({'_id': doc['_id']}, {'$set': {'v1-label': wordLabel}})
+                    wordLabel = '公示公告' if '公示' in label else label
+        client.update_one({'_id': doc['_id']}, {'$set': {'v2-label': wordLabel}})
 if __name__ == '__main__':
     # test1()
     # test2()
@@ -291,27 +327,32 @@ if __name__ == '__main__':
     # test7()
     # test8()
 
-    for title in [
-        # '临夏河州大道—北滨河大道中压天然气管道 工程竣工并正式通气',
-        # '关于陈光荣等同志任职的通知',
-        # '民政部社会救助司调研指导临夏州脱贫攻坚',
-        # '姚逊在武乡县调研时强调抓好基层党建 助推脱贫攻坚',
-        # '州人民政府第32次常务会议',
-        # '州人民政府第30次常务会议',
-        # '长治市脱贫攻坚简报总第46期',
-        #
-        # '大九湖镇：狠抓一线落实 强化责任担当 全力以赴做好迎检工作',
-        # '宋洛乡：党风廉政建设 “三治融合”显实效',
-        # '中共神农架林区委员会组织部干部任前公示公告（2019年第009号)',
-        '组织部干部任前公示公告',
-    ]:
-        test9(title, fromSource=True)
+    # for title in [
+    #     '临夏河州大道—北滨河大道中压天然气管道 工程竣工并正式通气',
+    #     '关于陈光荣等同志任职的通知',
+    #     '民政部社会救助司调研指导临夏州脱贫攻坚',
+    #     '姚逊在武乡县调研时强调抓好基层党建 助推脱贫攻坚',
+    #     '州人民政府第32次常务会议',
+    #     '州人民政府第30次常务会议',
+    #     '长治市脱贫攻坚简报总第46期',
+    #
+    #     '大九湖镇：狠抓一线落实 强化责任担当 全力以赴做好迎检工作',
+    #     '宋洛乡：党风廉政建设 “三治融合”显实效',
+    #     '中共神农架林区委员会组织部干部任前公示公告（2019年第009号)',
+    #     '组织部干部任前公示公告',
+    # ]:
+    #     test9(title, fromSource=False)
 
     # test10(100)
-    # test11()
+    test11()
 
     # with open('keyCounter.json', 'r') as f:
     #     json_data = json.loads(f.read())
     #     print(len(json_data))  # 2343
 
     # pprint(jieba.lcut('中共神农架林区委员会组织部干部任前公示公告'))
+
+"""部分分类关键词待合并
+房产公示 => 公示公告
+
+"""
