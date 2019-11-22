@@ -21,14 +21,14 @@ wx + b <= -1  label2
 带等式约束问题： - 拉格朗日乘子法 -> 目标函数 + (拉格朗日乘子 * 约束条件)转化
 带不等式约束问题： - KKT条件
 """
-def selectJrand(i, m):
+def selectJrand(i, m):  # 如果满足优化的条件，我们就随机选取非i的一个点，进行优化比较
     j = i
     while (j == i):
         j = int(random.uniform(0, m))
     return j
 
 
-def clipAlpha(aj, H, L):
+def clipAlpha(aj, H, L):  # 使用辅助函数，对L和H进行调整
     if aj > H:
         aj = H
     if L > aj:
@@ -51,18 +51,33 @@ def smoSimple(dataMatIn, classLabels, C, toler, maxIter):
     b = 0
     m, n = dataMatrix.shape  # 矩阵的shape
     alphas = np.mat(np.zeros((m, 1)))  # 创建m行1列的0矩阵
-    iter = 0  # iter是循环次数的意思吗
+    iter = 0  # 没有任何alpha改变的情况下遍历数据的次数
     while (iter < maxIter):
         alphaPairsChanged = 0  # 用于记录alphas是否已经进行优化
         for i in range(m):
-            fXi = float(np.multiply(alphas, labelMat).T * (dataMatrix * dataMatrix[i, :].T)) + b  # 我们预测的类别
-            Ei = fXi - float(labelMat[i])
+            # 我们预测的类别 y[i] = w^Tx[i]+b; 其中因为 w = Σ(1~n) a[n]*label[n]*x[n]
+            fXi = float(np.multiply(alphas, labelMat).T * (dataMatrix * dataMatrix[i, :].T)) + b
+            Ei = fXi - float(labelMat[i])  # 预测结果与真实结果比对，计算误差Ei
+
+            # 约束条件 (KKT条件是解决最优化问题的时用到的一种方法。我们这里提到的最优化问题通常是指对于给定的某一函数，求其在指定作用域上的全局最小值)
+            # 0<=alphas[i]<=C，但由于0和C是边界值，我们无法进行优化，因为需要增加一个alphas和降低一个alphas。
+            # 表示发生错误的概率：labelMat[i]*Ei 如果超出了 toler， 才需要优化。至于正负号，我们考虑绝对值就对了。
+            '''
+            # 检验训练样本(xi, yi)是否满足KKT条件
+            yi*f(i) >= 1 and alpha = 0 (outside the boundary)
+            yi*f(i) == 1 and 0<alpha< C (on the boundary)
+            yi*f(i) <= 1 and alpha = C (between the boundary)
+            '''
             if ((labelMat[i] * Ei) < -toler) and (alphas[i] < C) or ((labelMat[i] * Ei > toler) and (alphas[i] > 0)):
+                # 如果满足优化的条件，我们就随机选取非i的一个点，进行优化比较
                 j = selectJrand(i, m)  # 随机选择第二个alpha
                 fXj = float(np.multiply(alphas, labelMat).T * (dataMatrix * dataMatrix[j, :].T)) + b
                 Ej = fXj - float(labelMat[j])
                 alphaIold = alphas[i].copy()
                 alphaJold = alphas[j].copy()
+
+                # L和H用于将alphas[j]调整到0-C之间。如果L==H，就不做任何改变，直接执行continue语句
+                # labelMat[i] != labelMat[j] 表示异侧，就相减，否则是同侧，就相加。
                 if (labelMat[i] != labelMat[j]):  # if-else 用于保证alpha在0-C之间
                     L = max(0, alphas[j] - alphas[i])  # L和H用于将alpha[j]调整到0和C之间
                     H = min(C, C + alphas[j] - alphas[i])
