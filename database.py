@@ -1,64 +1,12 @@
 import re
 from minitools.db.mongodb import get_mongodb_client
-from collections import Counter
 from pprint import pprint
 import json
 import jieba
-from minitools.ml.naivebayes import NaiveBayes
-import numpy as np
 
 
 def cutTitle(title):
     return [i for i in jieba.lcut(title) if len(i.strip()) > 1]
-
-
-def test1():
-    text = """
-    军事：
-    金融：补贴信息
-    财经：建设进展
-    时政：时政|国务院|两会|工作部门|工作动态|政务公开|政策解读|依法行政|组织机构|贯彻落实
-    行政：行政权力
-    视频：视频
-    图片：图片报道
-    民生：老年人|脱贫攻坚|便民|就业信息|住房保障
-    交通：路况信息
-    社会：专题专栏|新时代|热点聚集|长治市红十字会|聚焦民企
-    人文：人文
-    人事：专辑-|部门信息|工作交流|领导活动|领导信息
-    数据：数据分析|公共数据
-    文件：文件
-    年报：年度报告|年报
-    要闻：-要闻
-    公告：采购公告|公示公告|公开报告
-    最新动态：最新动态
-    业务：业务信息|总结计划
-    应急管理：应急管理
-    行政处罚：行政处罚
-    法律法规：公开规定
-    监督检查：监督检查
-    行政许可：行政许可
-    """
-    RER = re.compile('[：:](.*)').search
-    filter_in = []
-    for tex in text.strip().split('\n'):
-        te = RER(tex).group(1)
-        filter_in.extend([i for i in te.split('|') if i])
-    cza = get_mongodb_client()['news']['train']
-    count = 0
-    for new in cza.find({}, {'_id': 0, '金融分类': 1}):
-        if count == 300:
-            break
-        ccc = new['金融分类']
-        flag = 0
-        for i in filter_in:
-            if i in ccc:
-                flag = 1
-                break
-        if flag:
-            continue
-        print(ccc)
-        count += 1
 
 
 def test2():
@@ -96,47 +44,60 @@ def test3():
 def test4():
     with open('keyCounter.json', 'r') as f:
         json_data = json.loads(f.read())
-    # pprint(json_data)
-    # print(len(json_data))  # 2343
     new_data = {}
     for key, value in json_data.items():
+        jump = False
+        for fil in ['伊春', '文昌', '长治', '咸阳', '嘉兴', '贵州', '外埠', '阳泉', '盐城', '昌平',
+                    '孙大军', '安顺', '宝坻', '山西', '巴中', '怀柔', '襄阳', '驻芜', '驻柳', '首页其他', '馆务', '馆藏',
+                    '陵水', '南宁', '安阳', '乌海', '黎苗', '巴州', '盘锦', '凉都', '视频', '临夏', '柳州', '下载', '相关新闻',
+                    '公开文件', '白沙', '顺义', '芜湖', '龙湾', '兴安', '兴谷', '衡水', '专题集锦', '河南', '走进', '图片',
+                    '图表', '六个如何', '创模', '精彩', '他山之石', '好人', '焦作', '智库', '留言选登', '黔府', '两会',
+                    '区人防办', '各地创建', '南开', '两会', '国有企业', '三变', '杨勤荣说', '项目介绍', '注销撤销', '网站首页',
+                    '豫风楚韵', '澄迈', '桂林', '宜居生活', '百姓问政', '价格信息', '文件', '煤化', 'Home', '投资平台', '延庆',
+                    '佳作欣赏', '代表建议', '信阳', '特色节目', '赛事动态', '主动发声', '创卫', '宿迁', '创建要闻', '创卫要闻']:
+            if fil in key:
+                jump = True
+                break
+        if jump:
+            continue
         if value >= 50:
             new_data[key] = value
-    new_data.pop('Home')
-    # pprint(new_data)
-    # print(len(new_data))
+    print(f"{len(json_data)} => {len(new_data)}")
     with open('newKeyCounter.json', 'w') as f:
         f.write(json.dumps(new_data, ensure_ascii=False))
 
 
-def test5():
-    with open('newKeyCounter.json', 'r') as f:  # 所有的分类以及各个分类的数据量
-        json_data = json.loads(f.read())
-    pprint(json_data)
-    values = json_data.values()
-    print(sum(values))  # 总计 483184 条
-
-
 def test6():
+    NO_D = re.compile('\d+').search
     cza = get_mongodb_client()['news']['train']
     titles = set()
-    for new in cza.find({}, {'_id': 0, 'label': 1, '标题': 1}):
-        titles |= set(cutTitle(new['标题']))  # 改为非全切割，成功率会提高。但是任然存在模型致命缺陷。模型的前提就是词与词之间无关联，相互独立！
-    # pprint(titles)
-    print(len(titles))  # 501878 => 106506 最新少了好多
+    all_label = set()
+    for new in cza.find({}, {'_id': 0, 'label': 1}):
+        all_label.add(new['label'])
+    for label in all_label:
+        jump = False
+        for fil in ['伊春', '文昌', '长治', '咸阳', '嘉兴', '贵州', '外埠', '阳泉', '盐城', '昌平',
+                    '孙大军', '安顺', '宝坻', '山西', '巴中', '怀柔', '襄阳', '驻芜', '驻柳', '首页其他', '馆务', '馆藏',
+                    '陵水', '南宁', '安阳', '乌海', '黎苗', '巴州', '盘锦', '凉都', '视频', '临夏', '柳州', '下载', '相关新闻',
+                    '公开文件', '白沙', '顺义', '芜湖', '龙湾', '兴安', '兴谷', '衡水', '专题集锦', '河南', '走进', '图片',
+                    '图表', '六个如何', '创模', '精彩', '他山之石', '好人', '焦作', '智库', '留言选登', '黔府', '两会',
+                    '区人防办', '各地创建', '南开', '两会', '国有企业', '三变', '杨勤荣说', '项目介绍', '注销撤销', '网站首页',
+                    '豫风楚韵', '澄迈', '桂林', '宜居生活', '百姓问政', '价格信息', '文件', '煤化', 'Home', '投资平台', '延庆',
+                    '佳作欣赏', '代表建议', '信阳', '特色节目', '赛事动态', '主动发声', '创卫', '宿迁', '创建要闻', '创卫要闻']:
+            if fil in label:
+                jump = True
+                break
+        if jump:
+            continue
+        if cza.count({'label': label}) < 50:
+            continue
+        print(f'获取到: {label}')
+        for new in cza.find({'label': label}, {'_id': 0, '标题': 1}):
+            titles |= set([i for i in cutTitle(new['标题']) if not NO_D(i)])
+
+    print(len(titles))  # 501878 => 106506 => 88991
     with open('allUniqueLabel.json', 'w') as f:
         f.write(json.dumps(list(titles), ensure_ascii=False))
-
-
-def test7():
-    with open('allUniqueLabel.json', 'r') as f:
-        json_data = json.loads(f.read())
-    # NO_D = re.compile('\d+').search
-    # print(len(json_data))
-    # json_data = [i for i in json_data if not NO_D(i)]
-    # print(len(json_data))
-    # with open('allUniqueLabel.json', 'w') as f:
-    #     f.write(json.dumps(json_data, ensure_ascii=False))
 
 
 def test8():
@@ -144,50 +105,13 @@ def test8():
         keyCounter = list(json.loads(f.read()).keys())
     with open('allUniqueLabel.json', 'r') as f:
         json_data = json.loads(f.read())
-    # vector = np.array([1 for _ in range(len(json_data))])
-    # count = len(json_data)
-    # vector = vector / count
-    # print(len(keyCounter))  # 832
-    # -------------------------------------------------------------
     cza = get_mongodb_client()['news']['train']
-    # count = []
-    # ttt = 0
-    # for key in keyCounter:
-    #     ttt += 1
-    #     count.append(cza.count({'label': key}))
-    # print(ttt)
-    # print(sum(count))
-
-    # ---------------- 训练数据的具体代码 ------------------------------
-    # with open('train.txt', 'w+') as f:
-    #     for key in keyCounter:
-    #         index_dict = {}
-    #         for new in cza.find({'label': key}, {'_id': 0, 'label': 1, '标题': 1}):
-    #             # todo 可以只保存下标，获取得到字典，然后训练字典与目标字典进行合并，已朴素贝叶斯求解
-    #             for word in cutTitle(new['标题']):
-    #                 if word in json_data:
-    #                     index = json_data.index(word)
-    #                     index_dict[index] = index_dict.get(index, 0) + 1
-    #         sumValue = sum(index_dict.values())
-    #         index_dict = {key: value / sumValue for key, value in index_dict.items()}
-    #         f.write(json.dumps(index_dict, ensure_ascii=False) + '|' + key + '\n')
-    #         del index_dict
-    #         print(key, 'done')
     with open('train.txt', 'w+') as f:
         for key in keyCounter:
-            jump = False
-            for fil in ['伊春', '文昌', '长治', '咸阳', '嘉兴', '贵州', '外埠', '阳泉','盐城','昌平',
-'孙大军', '安顺', '宝坻', '山西', '巴中', '怀柔', '襄阳'
-'陵水','南宁','安阳','乌海', '黎苗',]:
-                if fil in key:
-                    jump = True
-                    break
-            if jump:
-                continue
             index_dict = {}
-            jss = 0
+            jss = 0  # 训练数据是不是需要稍微限制一下。还是需要限制一下，应该本身自己分得就不是很对
             for new in cza.find({'label': key}, {'_id': 0, 'label': 1, '标题': 1}):
-                if jss == 3001:
+                if jss == 5001:  # 限制5k把
                     break
                 jss += 1
                 for word in cutTitle(new['标题']):
@@ -215,37 +139,29 @@ def test8():
             print(key, 'done')
 
 
-def test9(title="", fromSource=False):
+def test9(title=""):
     wordTitle = title
     with open('allUniqueLabel.json', 'r') as f:
         json_data = json.loads(f.read())
     index_dict = {}
     for word in cutTitle(wordTitle):
         if word in json_data:
-            # print(word)
             index_dict[json_data.index(word)] = index_dict.get(json_data.index(word), 0) + 1
-    # print(cutTitle('每日水质结果公示9月15日'))
     wordLabel = None
     wordValue = 0
     with open('train.txt', 'r') as f:
         for content in f:
             json_data, label = content.strip().split('|')
-            trainSet = json.loads(json_data)  # 得到训练数据
+            trainSet = json.loads(json_data)
             wordValueTemp = 0
             for key, value in index_dict.items():
                 trainKey = trainSet.get(str(key), None)
                 if trainKey:
                     wordValueTemp += value * trainKey
-            # if label == '每日水质' or label == '人事任免':
-            #     print(label, wordValueTemp, '##################')
-            # else:
-            #     print(label, wordValueTemp)
             if wordValueTemp > wordValue:
                 wordValue = wordValueTemp
-                wordLabel = label
+                wordLabel = '公示公告' if '公示' in label else label
         print(f"原标题：{wordTitle}")
-        print(f"原：{get_mongodb_client()['news']['train'].find_one({'标题': wordTitle}, {'label': 1, '_id': 0})}") \
-            if fromSource else None
         print(f"预测分类为：{wordLabel}\n")
 
 
@@ -267,10 +183,7 @@ def test10(limit=-1):
         wordLabel = None
         wordValue = 0
         with open('train.txt', 'r') as f:
-            while True:
-                content = f.readline()
-                if not content:
-                    break
+            for content in f:
                 train_json_data, label = content.strip().split('|')
                 trainSet = json.loads(train_json_data)  # 得到训练数据
                 wordValueTemp = 0
@@ -280,7 +193,7 @@ def test10(limit=-1):
                         wordValueTemp += value * trainKey
                 if wordValueTemp > wordValue:
                     wordValue = wordValueTemp
-                    wordLabel = label
+                    wordLabel = '公示公告' if '公示' in label else label
             print(f"原标题：{wordTitle}")
             print(f"金融分类：{doc['金融分类']}")
             print(f"原label：{doc['label']}")
@@ -290,7 +203,9 @@ def test10(limit=-1):
                 right_num += 1
             else:
                 print("预测错误\n")
-    print(f"正确率为：{100*right_num/all_num}%")
+    print(f"正确率为：{100 * right_num / all_num}%")
+
+
 def test11():
     with open('allUniqueLabel.json', 'r') as f:
         json_data = json.loads(f.read())
@@ -316,16 +231,15 @@ def test11():
                 if wordValueTemp > wordValue:
                     wordValue = wordValueTemp
                     wordLabel = '公示公告' if '公示' in label else label
-        client.update_one({'_id': doc['_id']}, {'$set': {'v2-label': wordLabel}})
+        client.update_one({'_id': doc['_id']}, {'$set': {'v3-label': wordLabel}})
+
+
 if __name__ == '__main__':
-    # test1()
     # test2()
     # test3()
     # test4()
-    # test5()
     # test6()
-    # test7()
-    # test8()
+    test8()
 
     # for title in [
     #     '临夏河州大道—北滨河大道中压天然气管道 工程竣工并正式通气',
@@ -345,14 +259,3 @@ if __name__ == '__main__':
 
     # test10(100)
     test11()
-
-    # with open('keyCounter.json', 'r') as f:
-    #     json_data = json.loads(f.read())
-    #     print(len(json_data))  # 2343
-
-    # pprint(jieba.lcut('中共神农架林区委员会组织部干部任前公示公告'))
-
-"""部分分类关键词待合并
-房产公示 => 公示公告
-
-"""
