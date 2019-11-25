@@ -241,6 +241,7 @@ def test11():
                     wordValue = wordValueTemp
                     label = '公示公告' if '公示' in label else label
                     label = '其他信息' if '住房资讯' in label else label
+                    label = '其他信息' if '回应关切' in label else label
                     wordLabel = '其他信息' if '畜牧兽医' in label else label
         print(f"v1:{doc['v1-label']}-v2:{doc['v2-label']}-v3:{wordLabel}")
         client.update_one({'_id': doc['_id']}, {'$set': {'v3-label': wordLabel}})
