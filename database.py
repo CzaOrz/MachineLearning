@@ -166,6 +166,8 @@ def test9(title=""):
             if wordValueTemp > wordValue:
                 wordValue = wordValueTemp
                 wordLabel = '公示公告' if '公示' in label else label
+                wordLabel = '其他信息' if '住房资讯' in label else label
+                wordLabel = '其他信息' if '畜牧兽医' in label else label
         print(f"原标题：{wordTitle}")
         print(f"预测分类为：{wordLabel}\n")
 
@@ -199,6 +201,8 @@ def test10(limit=-1):
                 if wordValueTemp > wordValue:
                     wordValue = wordValueTemp
                     wordLabel = '公示公告' if '公示' in label else label
+                    wordLabel = '其他信息' if '住房资讯' in label else label
+                    wordLabel = '其他信息' if '畜牧兽医' in label else label
             print(f"原标题：{wordTitle}")
             print(f"金融分类：{doc['金融分类']}")
             print(f"原label：{doc['label']}")
@@ -236,7 +240,11 @@ def test11():
                 if wordValueTemp > wordValue:
                     wordValue = wordValueTemp
                     wordLabel = '公示公告' if '公示' in label else label
+                    wordLabel = '其他信息' if '住房资讯' in label else label
+                    wordLabel = '其他信息' if '畜牧兽医' in label else label
+        print(f"v1:{doc['v1-label']}-v2:{doc['v2-label']}-v3:{wordLabel}")
         client.update_one({'_id': doc['_id']}, {'$set': {'v3-label': wordLabel}})
+    client.close()
 
 
 if __name__ == '__main__':
@@ -244,7 +252,7 @@ if __name__ == '__main__':
     # test3()
     # test4()
     # test6()
-    test8()
+    # test8()
 
     # for title in [
     #     '临夏河州大道—北滨河大道中压天然气管道 工程竣工并正式通气',
