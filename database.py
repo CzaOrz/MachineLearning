@@ -165,8 +165,8 @@ def test9(title=""):
                     wordValueTemp += value * trainKey
             if wordValueTemp > wordValue:
                 wordValue = wordValueTemp
-                wordLabel = '公示公告' if '公示' in label else label
-                wordLabel = '其他信息' if '住房资讯' in label else label
+                label = '公示公告' if '公示' in label else label
+                label = '其他信息' if '住房资讯' in label else label
                 wordLabel = '其他信息' if '畜牧兽医' in label else label
         print(f"原标题：{wordTitle}")
         print(f"预测分类为：{wordLabel}\n")
@@ -200,8 +200,8 @@ def test10(limit=-1):
                         wordValueTemp += value * trainKey
                 if wordValueTemp > wordValue:
                     wordValue = wordValueTemp
-                    wordLabel = '公示公告' if '公示' in label else label
-                    wordLabel = '其他信息' if '住房资讯' in label else label
+                    label = '公示公告' if '公示' in label else label
+                    label = '其他信息' if '住房资讯' in label else label
                     wordLabel = '其他信息' if '畜牧兽医' in label else label
             print(f"原标题：{wordTitle}")
             print(f"金融分类：{doc['金融分类']}")
@@ -239,8 +239,8 @@ def test11():
                         wordValueTemp += value * trainKey
                 if wordValueTemp > wordValue:
                     wordValue = wordValueTemp
-                    wordLabel = '公示公告' if '公示' in label else label
-                    wordLabel = '其他信息' if '住房资讯' in label else label
+                    label = '公示公告' if '公示' in label else label
+                    label = '其他信息' if '住房资讯' in label else label
                     wordLabel = '其他信息' if '畜牧兽医' in label else label
         print(f"v1:{doc['v1-label']}-v2:{doc['v2-label']}-v3:{wordLabel}")
         client.update_one({'_id': doc['_id']}, {'$set': {'v3-label': wordLabel}})
