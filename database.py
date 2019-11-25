@@ -121,6 +121,11 @@ def test8():
             dict_values = index_dict.values()
             dict_values_max = max(dict_values)
             dict_values_min = min(dict_values)
+            if dict_values_max == dict_values_min:
+                if dict_values_min == 1:
+                    continue
+                else:
+                    dict_values_min = dict_values_min / 2
             denominator = dict_values_max - dict_values_min
             new_index_dict = {}
             for index_dict_key, index_dict_value in index_dict.items():
@@ -255,7 +260,7 @@ if __name__ == '__main__':
     #     '中共神农架林区委员会组织部干部任前公示公告（2019年第009号)',
     #     '组织部干部任前公示公告',
     # ]:
-    #     test9(title, fromSource=False)
+    #     test9(title)
 
     # test10(100)
     test11()
